@@ -7,9 +7,8 @@ import useSWR from "swr";
 import fetcher from "../../utils/fetchMessages";
 const ChatInput = () => {
   const [input, setInput] = useState("");
-  const { data, error, mutate } = useSWR("/api/getMessages", fetcher);
-  console.log("SWR call", data);
-  const addMessage = (e: FormEvent<HTMLFormElement>) => {
+  const { data: messages, error, mutate } = useSWR("/api/getMessages", fetcher);
+  const addMessage = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!input) return;
     const messageToSend = input;
@@ -30,11 +29,13 @@ const ChatInput = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ message }),
-      });
-      const data = await res.json();
-      console.log("Message Added >>>>", data);
+      }).then((res) => res.json());
+      return [res.message, ...messages!];
     };
-    uploadMessagetoUpStash();
+    await mutate(uploadMessagetoUpStash, {
+      optimisticData: [message, ...messages!],
+      rollbackOnError: true,
+    });
   };
   return (
     <form

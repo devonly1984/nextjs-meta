@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { LogoutButton } from "./Templates";
+import { LogoutButton } from ".";
 
 const Header = () => {
   const session = true;
